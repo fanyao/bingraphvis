@@ -214,9 +214,14 @@ class AngrAsm(Content):
 
     def gen_render(self, n):
         node = n.obj
-        
+    
+        #print "FY: enter Asm, node name is %s" % type(node).__name__    
+        #fanyao commented: apparently, for CFGAccurate, the node name
+        #has changed to 'CFGNodeA'. I will change it here to match the
+        #change
         #CFG
-        if type(node).__name__ == 'CFGNode':
+        #if type(node).__name__ == 'CFGNode':
+        if type(node).__name__ == 'CFGNode' or type(node).__name__ == 'CFGNodeA':
             is_syscall = node.is_syscall
             is_simprocedure = node.is_simprocedure
             addr = node.addr
@@ -256,6 +261,7 @@ class AngrAsm(Content):
         else:
             return
 
+        #print "FY: check function call type"    
         if is_simprocedure or is_syscall:
             return None
 
@@ -266,6 +272,7 @@ class AngrAsm(Content):
             #TODO add logging
             insns = []
 
+        #print "FY: initial ASM insts"    
         data = []
         for ins in insns:
             data.append({

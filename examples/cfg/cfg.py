@@ -2,7 +2,7 @@
 
 from bingraphvis import DotOutput
 from bingraphvis.angr import *
-from bingraphvis.openreil import *
+#from bingraphvis.openreil import *
 from bingraphvis.angr.x86 import *
 
 samples_dir = "../../samples/cfg/"
@@ -17,6 +17,7 @@ def angr_cfg(sample):
     start_state.stack_push(0x0)
     cfg = proj.analyses.CFGAccurate(fail_fast=True, starts=[addr], initial_state=start_state, context_sensitivity_level=1, keep_state=True, normalize=False)
 
+
     vis = AngrVisFactory().default_cfg_pipeline(cfg, asminst=True, vexinst=False)
     vis.set_output(DotOutput(sample + '_angr_asm', format="png"))
     vis.process(cfg.graph)
@@ -25,8 +26,8 @@ def angr_cfg(sample):
     vis.set_output(DotOutput(sample + '_angr_vex', format="png"))
     vis.process(cfg.graph)
 
-from pyopenreil.REIL import *
-from pyopenreil.utils import bin_BFD
+#from pyopenreil.REIL import *
+#from pyopenreil.utils import bin_BFD
 
 def openreil_cfg(sample):
     reader = bin_BFD.Reader(samples_dir + sample)
@@ -52,4 +53,4 @@ if __name__ == "__main__":
     samples = ["cfg_0"]
     for sample in samples:
         angr_cfg(sample)
-        openreil_cfg(sample)
+#        openreil_cfg(sample)
