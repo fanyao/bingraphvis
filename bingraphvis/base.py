@@ -294,6 +294,59 @@ class VisPipeLine(object):
             c.cluster(graph)
         
         return graph
+
+    #fanyao added:
+    def save_to_file(self, filter=None, file_name=None):
+
+        graph = self.graph
+        edge_file_name = file_name + "_edge.dat"
+        #node_file_name = file_name + "_node.dat"
+
+        print "FY: write edge data to %s" % edge_file_name
+        edge_file = open(edge_file_name, "w")
+        for edge in graph.edges:
+            edge_line = self.get_edge_info(edge)
+            edge_file.write(edge_line + "\n")
+        edge_file.close()
+
+    #fanyao added
+    def get_edge_info(self, edge=None):
+       edge_src = edge.src.obj.addr
+       edge_dst = edge.dst.obj.addr
+       edge_weight = 0
+       if 'jumpkind' in edge.meta:
+         jk = edge.meta['jumpkind']
+         if jk == 'Ijk_Ret':
+             edge_weight = 5
+         elif jk == 'Ijk_FakeRet':
+             edge_weight = 6
+         elif jk == 'Ijk_Call':
+             edge_weight = 4
+         elif jk == 'Ijk_Boring':
+             if 'asm' in edge.src.content:
+                 asm = edge.src.content['asm']
+                 if 'data' in asm and len(asm['data']) > 0:
+                     last = edge.src.content['asm']['data'][-1]
+                     if last['mnemonic']['content'].find('jmp') == 0:
+                         edge_weight = 3
+                     elif last['mnemonic']['content'].find('j') == 0:
+                         try:
+                             if int(last['operands']['content'],16) == edge.dst.obj.addr:
+                                 edge_weight = 1
+                             else:
+                                 edge_weight = 2
+                         except Exception, e:
+                             #TODO warning
+                             edge_weight = -1
+                     else:
+                         edge_weight = 3
+                 else:
+                     edge_weight = -1
+       else:
+         #TODO warning
+         edge_weight = -1
+         
+       return hex(edge_src) + " " + hex(edge_dst) + " " + str(edge_weight)
         
         
 class Vis(object):
@@ -308,6 +361,14 @@ class Vis(object):
             self.preprocess(obj)
         graph = self.pipeline.process(filter=filter)        
         return self.output.generate(graph)
+    
+    #fanyao added:
+    def save_to_file(self, obj=None, filter=None, file_name=None):
+        print "FY: save to file"
+        if obj:
+            self.preprocess(obj)
+        graph = self.pipeline.process(filter=filter)        
+        self.pipeline.save_to_file(file_name=file_name)        
 
     def set_source(self, source):
         self.pipeline.set_source(source)
